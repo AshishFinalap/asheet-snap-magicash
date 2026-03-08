@@ -1,51 +1,33 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import {
-  User,
-  onAuthStateChanged,
-  signInWithPopup,
-  signOut as firebaseSignOut,
-  signInAnonymously,
-  updateProfile,
-} from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase";
+import React, { createContext, useContext, useState } from "react";
+
+interface AppUser {
+  uid: string;
+  displayName: string;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
-  signInAsGuest: (displayName: string) => Promise<void>;
-  signOut: () => Promise<void>;
+  signIn: (displayName: string) => void;
+  signOut: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<AppUser | null>(null);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
+  const signIn = (displayName: string) => {
+    setUser({
+      uid: crypto.randomUUID(),
+      displayName: displayName || "Anonymous",
     });
-    return unsubscribe;
-  }, []);
-
-  const signInWithGoogle = async () => {
-    await signInWithPopup(auth, googleProvider);
   };
 
-  const signInAsGuest = async (displayName: string) => {
-    const cred = await signInAnonymously(auth);
-    await updateProfile(cred.user, { displayName });
-  };
-
-  const signOut = async () => {
-    await firebaseSignOut(auth);
-  };
+  const signOut = () => setUser(null);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInAsGuest, signOut }}>
+    <AuthContext.Provider value={{ user, loading: false, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
