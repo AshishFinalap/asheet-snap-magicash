@@ -1,25 +1,19 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FileSpreadsheet } from "lucide-react";
 
 const Login: React.FC = () => {
-  const { signInWithGoogle, signInAsGuest } = useAuth();
-  const [guestName, setGuestName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
 
-  const handleGoogle = async () => {
-    setLoading(true);
-    try { await signInWithGoogle(); } catch { /* user cancelled */ }
-    setLoading(false);
-  };
-
-  const handleGuest = async () => {
-    if (!guestName.trim()) return;
-    setLoading(true);
-    try { await signInAsGuest(guestName.trim()); } catch { /* error */ }
-    setLoading(false);
+  const handleSignIn = () => {
+    const displayName = name.trim() || "Guest";
+    signIn(displayName);
+    navigate("/");
   };
 
   return (
@@ -36,35 +30,15 @@ const Login: React.FC = () => {
         </div>
 
         <div className="space-y-3">
-          <Button
-            className="w-full"
-            onClick={handleGoogle}
-            disabled={loading}
-          >
-            Sign in with Google
+          <Input
+            placeholder="Enter your name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
+          />
+          <Button className="w-full" onClick={handleSignIn}>
+            Enter
           </Button>
-
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted-foreground">or continue as guest</span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
-
-          <div className="flex gap-2">
-            <Input
-              placeholder="Your name"
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleGuest()}
-            />
-            <Button
-              variant="secondary"
-              onClick={handleGuest}
-              disabled={loading || !guestName.trim()}
-            >
-              Go
-            </Button>
-          </div>
         </div>
       </div>
     </div>
