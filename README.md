@@ -1,73 +1,165 @@
-# Welcome to your Lovable project
+# CollabSheet
 
-## Project info
+A minimal real-time collaborative spreadsheet built with **Next.js 14**, **TypeScript**, **Tailwind CSS**, and **Firebase**.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- 📊 **20×10 spreadsheet grid** with keyboard navigation
+- 🔢 **Formula support**: `=A1+B1`, `=A1-B1`, `=A1*2`, `=SUM(A1:A5)`
+- 🔄 **Real-time collaboration** via Firestore `onSnapshot`
+- 👥 **User presence** — see who's editing and on which cell
+- 💾 **Save indicator** (Saving / Saved)
+- 🔐 **Auth** — Google Sign-In or anonymous guest with display name
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## Project Structure
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+```
+src/
+├── app/
+│   ├── layout.tsx              # Root layout
+│   ├── page.tsx                # Dashboard (document list)
+│   └── document/[id]/page.tsx  # Spreadsheet editor
+├── components/
+│   ├── spreadsheet/
+│   │   ├── SpreadsheetGrid.tsx # Main grid (20×10)
+│   │   ├── Cell.tsx            # Individual cell
+│   │   └── FormulaBar.tsx      # Formula display bar
+│   └── ui/
+│       ├── AuthGate.tsx        # Auth wrapper
+│       └── PresenceBar.tsx     # Active users indicator
+├── lib/
+│   ├── firebase.ts             # Firebase init
+│   ├── formulaEngine.ts        # Client-side formula parser
+│   ├── documents.ts            # Firestore document ops
+│   ├── presence.ts             # Presence tracking
+│   └── auth.ts                 # Auth helpers
+└── types/
+    └── index.ts                # Shared TypeScript types
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## Setup
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 1. Clone and install
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+git clone https://github.com/yourname/collabsheet
+cd collabsheet
+npm install
+```
 
-Follow these steps:
+### 2. Create a Firebase project
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. Go to [Firebase Console](https://console.firebase.google.com)
+2. Create a project
+3. Enable **Firestore** (Native mode)
+4. Enable **Authentication** → Google provider + Anonymous
+5. Copy your app credentials
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 3. Configure environment variables
 
-# Step 3: Install the necessary dependencies.
-npm i
+```bash
+cp .env.local.example .env.local
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+Fill in your Firebase credentials:
+
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+NEXT_PUBLIC_FIREBASE_APP_ID=...
+```
+
+### 4. Deploy Firestore security rules
+
+```bash
+npm install -g firebase-tools
+firebase login
+firebase use your-project-id
+firebase deploy --only firestore:rules
+```
+
+### 5. Run locally
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open [http://localhost:3000](http://localhost:3000).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## Deploy to Vercel
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Option A — Vercel CLI
 
-## What technologies are used for this project?
+```bash
+npm install -g vercel
+vercel
+```
 
-This project is built with:
+Follow the prompts, then add environment variables:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```bash
+vercel env add NEXT_PUBLIC_FIREBASE_API_KEY
+# repeat for each variable
+```
 
-## How can I deploy this project?
+### Option B — Vercel Dashboard
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+1. Push your repo to GitHub
+2. Go to [vercel.com](https://vercel.com) → Import Project
+3. Add all `NEXT_PUBLIC_FIREBASE_*` env vars in **Settings → Environment Variables**
+4. Deploy
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
+## Keyboard Shortcuts
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+| Key | Action |
+|-----|--------|
+| Arrow keys | Navigate cells |
+| Enter | Confirm & move down |
+| Tab | Confirm & move right |
+| F2 / double-click | Edit cell |
+| Escape | Cancel edit |
+| Delete / Backspace | Clear cell |
+| Any char | Start typing |
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
+
+## Formula Reference
+
+| Formula | Example |
+|---------|---------|
+| Addition | `=A1+B1` |
+| Subtraction | `=A1-B1` |
+| Multiplication | `=A1*2` |
+| Division | `=A1/B2` |
+| Sum range | `=SUM(A1:A10)` |
+| Cell reference | `=C3` |
+
+---
+
+## Example Commit History
+
+```
+feat: init Next.js 14 project with TypeScript and Tailwind
+feat: add Firebase config and auth helpers
+feat: implement Firestore document CRUD
+feat: build Cell and SpreadsheetGrid components
+feat: add formula engine (SUM, +, -, *, /)
+feat: implement real-time cell sync with onSnapshot
+feat: add user presence tracking
+feat: keyboard navigation (arrows, enter, tab, escape)
+feat: add FormulaBar and PresenceBar UI
+fix: handle formula circular reference gracefully
+chore: add Firestore security rules
+docs: add README and deployment instructions
+```
